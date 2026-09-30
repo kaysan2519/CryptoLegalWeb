@@ -1,0 +1,227 @@
+@import "tailwindcss";
+
+/* ==========================================================================
+   CLC Design Tokens
+   ========================================================================== */
+
+@theme inline {
+  --color-void: #080b10;
+  --color-surface: #11161d;
+  --color-surface-2: #151b24;
+  --color-paper: #e8e5de;
+  --color-mute: #89919d;
+  --color-accent: #315a78;
+  --color-accent-soft: #4a7195;
+  --color-bronze: #a88b5a;
+  --color-bronze-soft: #c2a578;
+
+  --font-display: "Fraunces Variable", ui-serif, Georgia, serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  --ease-editorial: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --container-content: 1280px;
+}
+
+/* ==========================================================================
+   Base
+   ========================================================================== */
+
+@layer base {
+  * {
+    border-color: var(--color-surface-2);
+  }
+
+  html {
+    scroll-behavior: smooth;
+    background-color: var(--color-void);
+    scrollbar-color: var(--color-surface-2) var(--color-void);
+    scrollbar-width: thin;
+  }
+
+  body {
+    background-color: var(--color-void);
+    color: var(--color-paper);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background-color: var(--color-bronze);
+    color: var(--color-void);
+  }
+
+  :focus-visible {
+    outline: 1px solid var(--color-bronze-soft);
+    outline-offset: 4px;
+  }
+
+  /* Slim, quiet scrollbar — WebKit */
+
+  *::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: var(--color-void);
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background-color: var(--color-surface-2);
+    border-radius: 999px;
+    border: 2px solid var(--color-void);
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background-color: var(--color-accent);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+/* ==========================================================================
+   Utilities
+   ========================================================================== */
+
+@utility container-clc {
+  width: 100%;
+  max-width: var(--container-content);
+  margin-inline: auto;
+  padding-inline: 1.5rem;
+}
+
+@media (min-width: 640px) {
+  .container-clc {
+    padding-inline: 2rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container-clc {
+    padding-inline: 2.5rem;
+  }
+}
+
+@utility text-balance-pretty {
+  text-wrap: balance;
+}
+
+/* Subtle paper grain */
+
+@utility bg-grain {
+  position: relative;
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.05;
+    mix-blend-mode: overlay;
+
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+}
+
+/* Numeral styling */
+
+@utility num-display {
+  font-family: var(--font-display);
+  font-feature-settings: "lnum" 1, "tnum" 1;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+/* --------------------------------------------------------------------------
+   Motion keyframes
+   -------------------------------------------------------------------------- */
+
+/* Error feedback: a short, polite shake (reserved for form validation).
+   Amplitude is small on purpose — feedback, not punishment. */
+@keyframes clc-shake {
+  10%, 90% { transform: translateX(-1px); }
+  20%, 80% { transform: translateX(2px); }
+  30%, 50%, 70% { transform: translateX(-3px); }
+  40%, 60% { transform: translateX(3px); }
+}
+
+.clc-shake {
+  animation: clc-shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+/* Loading placeholder shimmer — cheaper and quieter than a full pulse. */
+@keyframes clc-shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+
+.clc-skeleton {
+  background: linear-gradient(
+    100deg,
+    var(--color-surface-2) 40%,
+    color-mix(in srgb, var(--color-surface-2) 60%, var(--color-paper) 8%) 50%,
+    var(--color-surface-2) 60%
+  );
+  background-size: 200% 100%;
+  animation: clc-shimmer 1.8s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .clc-shake,
+  .clc-sheen::after,
+  .clc-skeleton {
+    animation: none;
+  }
+
+  .clc-sheen::after {
+    opacity: 0 !important;
+  }
+}
+
+/* Premium sheen sweep for solid primary CTAs. A soft bronze-tinted light
+   band crosses the button once on hover — transform/opacity only. */
+@utility clc-sheen {
+  position: relative;
+  overflow: hidden;
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0;
+    transform: translateX(-120%) skewX(-18deg);
+
+    background: linear-gradient(
+      105deg,
+      transparent 30%,
+      rgb(255 255 255 / 0.28) 50%,
+      transparent 70%
+    );
+  }
+
+  &:hover::after {
+    opacity: 1;
+    animation: clc-sheen-sweep 0.7s var(--ease-editorial);
+  }
+}
+
+@keyframes clc-sheen-sweep {
+  from { transform: translateX(-120%) skewX(-18deg); }
+  to { transform: translateX(120%) skewX(-18deg); }
+}
